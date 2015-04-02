@@ -113,7 +113,10 @@ trait SearchableTrait
     {
         foreach ($this->getJoins() as $table => $keys)
         {
-            $query->leftJoin($table, $keys[0], '=', $keys[1]);
+            $query->leftJoin($table, function($join) use ( $keys) {
+                        $join->on($keys[0], '=', $keys[1])
+                             ->on($keys[2], '=', DB::raw("'{$keys[3]}'"));
+                    });
         }
     }
 
@@ -192,6 +195,10 @@ trait SearchableTrait
         $queries[] = $this->getSearchQuery($query, $column, $relevance, $words, $like_comparator, 15);
         $queries[] = $this->getSearchQuery($query, $column, $relevance, $words, $like_comparator, 5, '', '%');
         $queries[] = $this->getSearchQuery($query, $column, $relevance, $words, $like_comparator, 1, '%', '%');
+
+        $queries[] = $this->getSearchQuery($query, $column, $relevance, $words, $like_comparator, 3, '', '% ');
+        $queries[] = $this->getSearchQuery($query, $column, $relevance, $words, $like_comparator, 3, '% ', '%');
+        $queries[] = $this->getSearchQuery($query, $column, $relevance, $words, $like_comparator, 3, '% ', ' %');
 
         return $queries;
     }
